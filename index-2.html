@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two Lies, One Truth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: noontime game show, loud and happy, but readable from the back of a classroom
+   IDEA: the studio stage of a "1, 2, 3, GO!" segment: big numbered tiles, a countdown, a reveal
+   PICTURE: the three statement tiles on a hot-pink stage under a strip of marquee lights
+   COLOUR and TYPE: pink stage, white buttons, sun-yellow numbers and truth; Bowlby One + Nunito
+   LAYOUT: Play is the whole first screen; Setup is one calm column for typing rounds */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#1a0b14);--ink:light-dark(#1f1218,#fbeef4);--muted:light-dark(#6e5562,#c9a9b9);
+--line:light-dark(#f1d6e3,#4a2236);--field:light-dark(#fff6fa,#26111d);
+--stage:light-dark(#e8207e,#6b0c3e);--stage2:light-dark(#c4105f,#4a0729);
+--card:light-dark(#ffffff,#2c1222);--pink:#e8207e;--pinkd:#8f0a47;--sun:#ffd23f}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Nunito,system-ui,sans-serif;overflow-x:clip}
+h1,h2,.disp{font-family:"Bowlby One",Impact,sans-serif;font-weight:400;line-height:1.05;text-wrap:balance;margin:0}
+button,input,textarea{font:inherit}
+button{cursor:pointer;min-height:44px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);padding:8px 16px;font-weight:800}
+button:focus-visible,a:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.top{background:var(--stage2);color:#fff;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:10px max(4vw,16px)}
+.top .disp{font-size:22px;margin-right:auto}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs a,.top button{color:#fff;text-decoration:none;font-weight:800;padding:10px 16px;border-radius:999px;min-height:44px;display:inline-flex;align-items:center;border:2px solid rgba(255,255,255,.25);background:transparent}
+.tabs a[aria-current=page]{background:#fff;color:var(--stage2);border-color:#fff}
+.lights{height:16px;background:var(--stage) radial-gradient(circle,#fff 3.5px,transparent 4.5px) 0 50%/24px 16px repeat-x}
+/* play */
+.stage{background:var(--stage);color:#fff;min-height:calc(100vh - 80px);padding:clamp(20px,3.5vw,48px) max(4vw,16px) 48px}
+.wrap{max-width:1240px;margin:0 auto}
+.meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-weight:800;font-size:17px;opacity:.9}
+.stage h1{font-size:clamp(30px,4.6vw,52px);margin:10px 0 24px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2vw,24px)}
+.card{position:relative;background:var(--card);color:var(--ink);border-radius:20px;padding:24px 22px 28px;border-bottom:8px solid rgba(0,0,0,.22);font-size:clamp(18px,2vw,25px);font-weight:800;line-height:1.3;transition:transform .35s,opacity .35s,background .35s}
+.card p{margin:14px 0 0;overflow-wrap:anywhere}
+.num{display:grid;place-items:center;width:60px;height:60px;border-radius:50%;background:var(--sun);color:#14161f;font:30px/1 "Bowlby One",sans-serif}
+.card.true{background:var(--sun);color:#14161f;transform:translateY(-6px) scale(1.03)}
+.card.true .num{background:#14161f;color:var(--sun)}
+.card.lie{opacity:.5}
+.stamp{position:absolute;top:18px;right:16px;font:24px/1 "Bowlby One",sans-serif;padding:6px 12px;border:3px solid currentColor;border-radius:10px;transform:rotate(8deg)}
+.card.lie .stamp{color:var(--pink)}
+.ctrl{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:14px;margin-top:32px;text-align:center}
+.big{font:clamp(24px,3.2vw,34px)/1 "Bowlby One",sans-serif;background:#fff;color:#c4105f;border:0;border-radius:999px;padding:20px 48px;box-shadow:0 8px 0 var(--pinkd)}
+.big:active{transform:translateY(4px);box-shadow:0 4px 0 var(--pinkd)}
+.rules{max-width:900px;margin:0 auto;text-align:left}
+.rules ul{margin:22px 0 0;padding-left:1.2em;font-size:clamp(18px,2vw,22px);font-weight:600}
+.rules li{margin-bottom:12px}.rules li::marker{color:var(--sun)}
+.setname{color:var(--sun)}
+.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.4)}
+.prompt{width:100%;font-size:clamp(20px,2.6vw,28px);font-weight:800;margin:0}
+.explain{max-width:900px;margin:28px auto 0;background:rgba(255,255,255,.12);border-radius:16px;padding:18px 22px;font-size:19px}
+.explain b{color:var(--sun)}
+.who{max-width:900px;margin:24px auto 0;text-align:center}
+.who p{margin:0 0 12px;font-weight:800;font-size:18px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.chip{border-radius:999px;background:#fff;color:#14161f;border:0;padding:10px 18px;font-weight:800}
+.chip[aria-pressed=true]{background:var(--pink);color:#fff;text-decoration:line-through}
+.chip.out{background:rgba(255,255,255,.15);color:rgba(255,255,255,.6);text-decoration:line-through;cursor:default}
+.note{min-height:28px;text-align:center;font-weight:800;color:var(--sun);margin-top:14px}
+.keys{text-align:center;opacity:.7;font-size:14px;margin-top:22px}
+.finale{text-align:center;padding-top:4vh}
+.finale h1{font-size:clamp(48px,9vw,110px);color:var(--sun)}
+.finale .chips .chip{font-size:24px;padding:14px 26px;background:var(--sun)}
+#cd{position:fixed;inset:0;z-index:9;display:grid;place-items:center;background:rgba(110,6,55,.92);color:#fff;font:clamp(120px,30vw,340px)/1 "Bowlby One",sans-serif}
+#cd[hidden]{display:none}#cd.go{color:var(--sun)}
+#cd.pop{animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){#cd.pop{animation:none}.card{transition:none}}
+/* setup */
+.setup{max-width:780px;margin:0 auto;padding:clamp(24px,4vw,48px) max(4vw,16px) 64px}
+.setup h1{font-size:clamp(30px,4vw,42px)}
+.lead{color:var(--muted);margin:10px 0 28px;font-size:17px}
+.round{border:2px solid var(--line);border-radius:18px;padding:16px 18px 18px;margin:0 0 18px}
+.round legend{font:20px "Bowlby One",sans-serif;padding:0 8px}
+.opt{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.pick{flex:none;position:relative;cursor:pointer}
+.pick input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.pick span{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:2px solid var(--line);font-weight:800;background:var(--field)}
+.pick input:checked+span{background:var(--pink);border-color:var(--pink);color:#fff}
+.pick input:focus-visible+span{outline:3px solid var(--stage);outline-offset:2px}
+textarea,.inp{width:100%;font-size:16px;border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--field);color:var(--ink);resize:vertical}
+.small{display:block;font-size:14px;color:var(--muted);font-weight:600;margin-top:6px}
+.small textarea{margin-top:4px;color:var(--ink)}
+.rowbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.danger{color:#d1124f}
+.hint{font-size:14px;color:var(--muted);margin:0 0 12px}
+.addrow{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 36px}
+.primary{background:var(--pink);color:#fff;border-color:var(--pink)}
+.setup h2{font-size:24px;margin:8px 0 6px}
+.check{display:flex;gap:10px;align-items:center;font-weight:700;margin:14px 0;min-height:44px}
+.check input{width:22px;height:22px}
+details{border-top:2px solid var(--line);margin-top:32px;padding-top:16px}
+summary{cursor:pointer;font-weight:800;min-height:44px;display:flex;align-items:center}
+.flag{font-size:14px;color:var(--muted)}
+@media(max-width:760px){.cards{grid-template-columns:minmax(0,1fr)}.card{padding:18px 18px 22px}.card p{margin-top:10px}.num{width:48px;height:48px;font-size:24px}.top .disp{font-size:18px;width:100%}}
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="disp">Two Lies, One Truth</span>
+  <nav class="tabs"><a href="#play" id="tab-play">Play</a><a href="#setup" id="tab-setup">Edit sets</a></nav>
+  <button type="button" id="snd" aria-pressed="true">Sound on</button>
+  <button type="button" id="fs">Full screen</button>
+</header>
+<div class="lights" aria-hidden="true"></div>
+
+<main>
+  <section id="play" class="stage" aria-live="polite"><div class="wrap" id="playbox"></div></section>
+
+  <section id="setup" class="setup" hidden>
+    <h1>Edit your sets</h1>
+    <p class="lead">Each set has three statements: one truth, two lies. The pink circle marks the <b>truth</b>. Changes save automatically in this browser.</p>
+    <div id="rounds"></div>
+    <div class="addrow"><button type="button" class="primary" id="add">+ Add a set</button><button type="button" id="toplay">Go to the game</button></div>
+
+    <label class="check"><input type="checkbox" id="shuffle"> Shuffle the order of the statements in each round</label>
+
+    <details>
+      <summary>Move your rounds to another computer</summary>
+      <p class="hint">Copy the code, send it to yourself, then paste it here on the computer you'll present from.</p>
+      <div class="addrow" style="margin:0 0 10px"><button type="button" id="copy">Copy setup code</button><span id="copied" class="flag" aria-live="polite"></span></div>
+      <textarea id="code" rows="4" aria-label="Paste a setup code" placeholder="Paste a setup code here"></textarea>
+      <div class="addrow" style="margin-top:10px"><button type="button" id="load">Load code</button><button type="button" id="reset" class="danger">Reset to the original 5 sets</button><span id="loadmsg" class="flag" aria-live="polite"></span></div>
+    </details>
+  </section>
+</main>
+<div id="cd" hidden aria-live="assertive"></div>
+
+<script>
+{
+const KEY='two-lies-one-truth-v2';
+const SAMPLE={shuffle:true,sound:true,rounds:[
+ {n:'Platforms & Origins',s:['OnlyFans launched in 2016 as a direct competitor to Patreon, specifically designed for video game streamers and podcasters.','OnlyFans was originally created in 2016 for general creators, musicians, and fitness trainers.','The Philippine “Alter” community started in 2020 during the pandemic lockdowns as a way to bypass dating app restrictions.'],t:1,x:''},
+ {n:'Economics of Content',s:['Most creators on platforms like OnlyFans earn less than $200/month.','Most active creators on OnlyFans earn a steady middle-class income of around $1,500 to $2,000/month.','Male creators actually outnumber female creators on subscription platforms, though female creators earn higher tips.'],t:0,x:''},
+ {n:'Labor & Connection',s:['Creators who rely strictly on automated, pre-scheduled posts earn significantly more than those who reply to DMs.','Success relies heavily on performing “parasocial intimacy” (faking a relationship).','Social media algorithms actively boost accounts that link to adult platforms because they drive higher user engagement.'],t:1,x:''},
+ {n:'Anonymity & Safety',s:['Non-consensual leaking and screenshotting of paid content is one of the biggest risks for online creators.','Using a VPN and a fake name prevents platforms and payment processors from ever knowing a creator’s legal identity.','Under Philippine labor laws, independent online adult creators can register as official freelancers to receive government-mandated benefits.'],t:0,x:''},
+ {n:'Safety & Governance',s:['Major payment companies like Visa and Mastercard are the primary defenders keeping adult content legal on mainstream platforms.','Social media crackdowns on adult content often end up censoring LGBTQ+ and sex-education posts.','Moving sex work completely online has reduced cyber-harassment and stalking cases by over 70%.'],t:1,x:''}
+]};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const valid=d=>d&&Array.isArray(d.rounds)&&d.rounds.every(r=>Array.isArray(r.s)&&r.s.length===3);
+let data=null;
+try{data=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!valid(data))data=clone(SAMPLE);
+delete data.players;
+let dirty=true;
+const save=()=>{dirty=true;try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}};
+
+/* ---------- sound ---------- */
+let ac=null;
+function beep(f,d){if(!data.sound)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.07,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+function sndLabel(){$('snd').textContent=data.sound?'Sound on':'Sound off';$('snd').setAttribute('aria-pressed',String(!!data.sound))}
+
+/* ---------- setup ---------- */
+function renderSetup(){
+  $('rounds').innerHTML=data.rounds.map((r,i)=>`<fieldset class="round" data-i="${i}">
+  <legend>Set ${i+1}</legend>
+  <input class="inp" data-k="n" value="${esc(r.n)}" placeholder="Set name, e.g. Platforms & Origins" aria-label="Set ${i+1} name" style="margin-bottom:12px">
+  ${r.s.map((s,j)=>`<div class="opt"><label class="pick" title="Mark as the truth"><input type="radio" name="t${i}" value="${j}" ${r.t===j?'checked':''} data-k="t" aria-label="Statement ${j+1} is the truth"><span>${j+1}</span></label><textarea rows="2" data-k="s" data-j="${j}" aria-label="Set ${i+1}, statement ${j+1}" placeholder="Statement ${j+1}">${esc(s)}</textarea></div>`).join('')}
+  <label class="small">Why the lies are false (shown after the reveal)<textarea rows="2" data-k="x">${esc(r.x)}</textarea></label>
+  <div class="rowbtns"><button type="button" data-a="up" ${i===0?'disabled':''}>Move up</button><button type="button" data-a="down" ${i===data.rounds.length-1?'disabled':''}>Move down</button><button type="button" data-a="del" class="danger">Delete set</button></div>
+  </fieldset>`).join('')||'<p class="hint">No sets yet. Add one below.</p>';
+  $('shuffle').checked=!!data.shuffle;
+}
+$('rounds').addEventListener('input',e=>{
+  const f=e.target.closest('.round');if(!f)return;const r=data.rounds[+f.dataset.i],k=e.target.dataset.k;
+  if(k==='s')r.s[+e.target.dataset.j]=e.target.value;else if(k==='x')r.x=e.target.value;else if(k==='n')r.n=e.target.value;else if(k==='t')r.t=+e.target.value;
+  save();
+});
+$('rounds').addEventListener('change',e=>{if(e.target.dataset.k==='t'){const f=e.target.closest('.round');data.rounds[+f.dataset.i].t=+e.target.value;save()}});
+$('rounds').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-a]');if(!b)return;const i=+b.closest('.round').dataset.i,R=data.rounds;
+  if(b.dataset.a==='up'&&i>0)[R[i-1],R[i]]=[R[i],R[i-1]];
+  if(b.dataset.a==='down'&&i<R.length-1)[R[i+1],R[i]]=[R[i],R[i+1]];
+  if(b.dataset.a==='del'){if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Tap again to delete';return}R.splice(i,1)}
+  save();renderSetup();
+});
+$('add').addEventListener('click',()=>{data.rounds.push({n:'',s:['','',''],t:0,x:''});save();renderSetup();const all=document.querySelectorAll('.round');all[all.length-1].querySelector('textarea').focus()});
+$('shuffle').addEventListener('change',e=>{data.shuffle=e.target.checked;save()});
+$('toplay').addEventListener('click',()=>{location.hash='play'});
+$('copy').addEventListener('click',()=>{const t=JSON.stringify(data);$('code').value=t;
+  try{navigator.clipboard.writeText(t).then(()=>$('copied').textContent='Copied.',()=>{$('copied').textContent='Copy blocked: the code is in the box below, select and copy it.'})}catch(e){$('copied').textContent='Copy blocked: the code is in the box below, select and copy it.'}});
+$('load').addEventListener('click',()=>{try{const d=JSON.parse($('code').value);if(!valid(d))throw 0;
+  data={shuffle:!!d.shuffle,sound:d.sound!==false,rounds:d.rounds.map(r=>({n:String(r.n??''),s:r.s.map(String),t:[0,1,2].includes(+r.t)?+r.t:0,x:String(r.x??'')}))};
+  save();renderSetup();$('loadmsg').textContent='Loaded '+data.rounds.length+' sets.'}catch(e){$('loadmsg').textContent='That code didn\'t work. Check that you pasted all of it.'}});
+$('reset').addEventListener('click',e=>{const b=e.target;if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Tap again to replace your sets';return}
+  data=clone(SAMPLE);save();renderSetup();b.dataset.sure='';b.textContent='Reset to the original 5 sets';$('loadmsg').textContent='Original sets restored.'});
+
+/* ---------- game ---------- */
+let g=null,note='';
+function newGame(){
+  const rounds=data.rounds.filter(r=>r.s.every(s=>s.trim()));
+  g={i:0,phase:rounds.length?'rules':'empty',rounds,
+     orders:rounds.map(()=>{const o=[0,1,2];if(data.shuffle)for(let k=2;k>0;k--){const m=Math.floor(Math.random()*(k+1));[o[k],o[m]]=[o[m],o[k]]}return o})};
+  note='';dirty=false;
+}
+function renderPlay(){
+  const box=$('playbox');
+  if(g.phase==='empty'){box.innerHTML=`<div class="finale"><h1>No sets yet</h1><p class="prompt" style="margin:18px 0">Add at least one set with all three statements filled in.</p><div class="ctrl"><a class="big" href="#setup" style="text-decoration:none">Edit sets</a></div></div>`;return}
+  if(g.phase==='rules'){
+    box.innerHTML=`<div class="rules"><h1>Two Lies, One Truth</h1><ul>
+    <li>Played in the form of <b>1, 2, 3 Go</b> (originally played on the game show <i>Wowowin</i> by Willie Revillame).</li>
+    <li>3 sentences are presented, which are <b>derived from the reporting</b> and will be discussed further later on.</li>
+    <li>The non-reporting members of the class will <b>choose the option that they think is the truth</b> among the given choices.</li>
+    <li><b>Correctly identifying the “truth” statement</b> gives you a chance to <b>move on to the next round</b>, until only 1 (or only a few) remain.</li>
+    </ul><div class="ctrl"><button type="button" class="big" data-a="start">Start</button></div></div>`;return}
+  if(g.phase==='end'){
+    box.innerHTML=`<div class="finale"><h1>That's a wrap!</h1>
+    <p class="prompt" style="margin-top:18px">All ${g.rounds.length} sets played. Whoever is still standing wins!</p>
+    <div class="ctrl"><button type="button" class="big" data-a="again">Play again</button></div></div>`;return}
+  const r=g.rounds[g.i],rev=g.phase==='reveal',ord=g.orders[g.i];
+  const truthPos=ord.indexOf(r.t)+1;
+  let ctrl='';
+  if(g.phase==='ask')ctrl=`<button type="button" class="big" data-a="go">GO!</button>`;
+  if(g.phase==='shown')ctrl=`<p class="prompt">Hold up 1, 2 or 3 fingers now!</p><button type="button" class="big" data-a="reveal">Reveal the truth</button>`;
+  if(rev){const last=g.i===g.rounds.length-1;ctrl=`<button type="button" class="big" data-a="next">${last?'Finish':'Next set →'}</button>`}
+  box.innerHTML=`<div class="meta"><span>Set ${g.i+1} of ${g.rounds.length}${r.n&&r.n.trim()?`: <span class="setname">${esc(r.n)}</span>`:''}</span>${rev?'<span>Wrong answer? Please sit down.</span>':''}</div>
+  <h1>${rev?`Number ${truthPos} is the truth!`:'Which one is the truth?'}</h1>
+  <div class="cards">${ord.map((o,p)=>`<div class="card ${rev?(o===r.t?'true':'lie'):''}"><span class="num">${p+1}</span><p>${esc(r.s[o])}</p>${rev?`<span class="stamp">${o===r.t?'Truth':'Lie'}</span>`:''}</div>`).join('')}</div>
+  ${rev&&r.x.trim()?`<div class="explain"><b>Why the others are lies:</b> ${esc(r.x)}</div>`:''}
+  <div class="ctrl">${ctrl}</div>
+  <div class="note">${esc(note)}</div>
+  <div class="ctrl" style="margin-top:8px"><button type="button" class="ghost" data-a="restart">Restart game</button></div>`;
+}
+function go(){
+  if(g.phase!=='ask')return;g.phase='count';note='';
+  const cd=$('cd'),seq=['1','2','3','GO!'];let k=0;cd.hidden=false;
+  const step=()=>{if(k<seq.length){cd.textContent=seq[k];cd.className=k===3?'go':'';void cd.offsetWidth;cd.classList.add('pop');beep(k===3?880:523,k===3?.4:.15);k++;setTimeout(step,800)}
+    else{cd.hidden=true;g.phase='shown';renderPlay()}};
+  step();
+}
+function reveal(){if(g.phase!=='shown')return;g.phase='reveal';beep(659,.12);setTimeout(()=>beep(988,.3),130);renderPlay()}
+function next(){
+  if(g.phase!=='reveal')return;
+  g.i++;
+  g.phase=g.i>=g.rounds.length?'end':'ask';
+  if(g.phase==='end')beep(784,.5);
+  renderPlay();
+}
+$('playbox').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-a]');if(!b)return;const a=b.dataset.a;
+  if(a==='start'){g.phase='ask';renderPlay()}
+  if(a==='go')go();if(a==='reveal')reveal();if(a==='next')next();
+  if(a==='again'||a==='restart'){newGame();renderPlay()}
+});
+document.addEventListener('keydown',e=>{
+  if($('play').hidden||/^(TEXTAREA|INPUT|BUTTON|A)$/.test(e.target.tagName))return;
+  if(e.key===' '||e.key==='Enter'){e.preventDefault();if(g.phase==='rules'){g.phase='ask';renderPlay()}else if(g.phase==='ask')go();else if(g.phase==='shown')reveal();else if(g.phase==='reveal')next()}
+  if(e.key==='f'||e.key==='F')fullscreen();
+});
+function fullscreen(){try{const p=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();p&&p.catch&&p.catch(()=>{})}catch(e){}}
+$('fs').addEventListener('click',fullscreen);
+$('snd').addEventListener('click',()=>{data.sound=!data.sound;save();dirty=false;sndLabel()});
+
+/* ---------- views ---------- */
+function route(){
+  const v=location.hash==='#setup'?'setup':'play';
+  $('setup').hidden=v!=='setup';$('play').hidden=v!=='play';
+  $('tab-play').toggleAttribute('aria-current',v==='play');$('tab-setup').toggleAttribute('aria-current',v==='setup');
+  if(v==='play'){$('tab-play').setAttribute('aria-current','page');if(dirty||!g)newGame();renderPlay()}
+  else{$('tab-setup').setAttribute('aria-current','page');renderSetup()}
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',route);
+sndLabel();route();
+}
+</script>
+</body>
+</html>
